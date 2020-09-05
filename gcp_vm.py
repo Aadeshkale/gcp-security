@@ -12,12 +12,21 @@ COMPUTE_CLIENT = discovery.build('compute', 'v1', credentials=credentials)
 PROJECT_ID = "info1-284008"
 
 
+# this class perform different checks on all gcp compute engines
+class Checks:
+    def __init__(self, all_info):
+        self.all_info = all_info
+
+
+
+
 class Resource:
 
     def __init__(self,compute_client,project):
         self.compute_client = compute_client
         self.project = project
 
+    # this method returns list of all zones of gcp
     def get_zones(self):
         zones = self.compute_client.zones().list(project=self.project).execute()
         zones_list = []
@@ -25,11 +34,17 @@ class Resource:
             zones_list.append(i['name'])
         return zones_list
 
-    # def list_instances(self, compute, project, zone):
-    #     result = compute.instances().list(project=project, zone=zone).execute()
-    #     return result['items'] if 'items' in result else None
+    # this method returns information of all compute engine of all zones
+    def all_instances(self):
+        all_info = {}
+        for n in self.get_zones():
+            result = self.compute_client.instances().list(project=self.project, zone=n).execute()
+            if 'items' in result:
+                if len(result['items']) > 0:
+                    all_info[n] = result['items']
+        return all_info
 
 
 res = Resource(compute_client=COMPUTE_CLIENT,project=PROJECT_ID)
-print(res.get_zones())
+print(res.all_instances())
 
