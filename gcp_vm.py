@@ -49,7 +49,102 @@ class Checks:
                 reason = "All Compute engine instances are running"
             return self.result_template(check_id, result, reason, resource_list, description)
 
+    # this method check compute engine instance does not have deletion protection
+    def check_1_2_deletion_protection(self):
+        check_id = 1.2
+        description = "Check for compute engine instances which does not have deletion protection"
+        if len(self.all_info) <= 0:
+            self.result_template(
+                check_id=check_id,
+                result=False,
+                reason="There is no gcp compute engine instances",
+                resource_list=[],
+                description=description
+            )
+        else:
+            resource_list = []
+            for reg, inst in self.all_info.items():
+                for m in inst:
+                    if m['deletionProtection'] == False:
+                        resource_list.append(m['id'])
+
+            if len(resource_list) > 0:
+                result = True
+                reason = "Compute engine instances does not have deletion protection"
+            else:
+                result = False
+                reason = "All Compute engine instances are deletion protected"
+            return self.result_template(check_id, result, reason, resource_list, description)
+
+    # this method check instance check whether compute engine instance has all api access
+    def check_1_3_all_api_access(self):
+        check_id = 1.3
+        description = "Check for compute engine instances has all api access"
+        if len(self.all_info) <= 0:
+            self.result_template(
+                check_id=check_id,
+                result=False,
+                reason="There is no gcp compute engine instances",
+                resource_list=[],
+                description=description
+            )
+        else:
+            resource_list = []
+            for reg, inst in self.all_info.items():
+                for m in inst:
+                    scope = "https://www.googleapis.com/auth/cloud-platform"
+                    if scope in str(m['serviceAccounts']):
+                        resource_list.append(m['id'])
+            if len(resource_list) > 0:
+                result = True
+                reason = "Compute engine instances have all api access"
+            else:
+                result = False
+                reason = "Compute engine instances does not have all api access"
+            return self.result_template(check_id, result, reason, resource_list, description)
+
+    # this method check whether compute engine instance disk has snapshot schedule
+    def check_1_4_snapshot_schedule_for_compute_engine_disk(self):
+        check_id = 1.4
+        description = "Check for whether compute engine instance disk has snapshot schedule"
+        if len(self.all_info) <= 0:
+            self.result_template(
+                check_id=check_id,
+                result=False,
+                reason="There is no gcp compute engine instances",
+                resource_list=[],
+                description=description
+            )
+        else:
+            resource_list = []
+            for reg, inst in self.all_info.items():
+                for m in inst:
+                    for disk in m['disks']:
+                        name = disk['deviceName']
+                        rep = self.check_snapshot_schedule(reg, name)
+                        if rep == True:
+                            resource_list.append(m['id'])
+
+            if len(resource_list) > 0:
+                result = True
+                reason = "Compute engine instance disk has snapshot schedule"
+            else:
+                result = False
+                reason = "Compute engine instances disks does not have snapshot schedule"
+            return self.result_template(check_id, result, reason, resource_list, description)
+
+
+
+
+
     # --- supporting methods ---
+    def check_snapshot_schedule(self, zone ,disk):
+        response = COMPUTE_CLIENT.disks().get(project=PROJECT_ID, zone=zone, disk=disk).execute()
+        if 'resourcePolicies' in str(response):
+            return True
+        else:
+            return False
+
     # this method generates template for each check
     def result_template(self, check_id, result, reason, resource_list, description):
         template = dict()
@@ -95,6 +190,7 @@ class Resource:
             if 'items' in result:
                 if len(result['items']) > 0:
                     all_info[n] = result['items']
+        # print(all_info)
         return all_info
 
 
@@ -111,6 +207,9 @@ class ExecuteCheck:
         check_obj = Checks(all_info=all_info)
         all_check_result = [
             check_obj.check_1_1_instances_which_are_not_running(),
+            check_obj.check_1_2_deletion_protection(),
+            check_obj.check_1_3_all_api_access(),
+            check_obj.check_1_4_snapshot_schedule_for_compute_engine_disk(),
         ]
         check_obj.generate_csv(all_check_result)
 
