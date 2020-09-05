@@ -1,7 +1,6 @@
 """
 This script perform some checks on GCP compute engine VM's
 """
-import os
 import csv
 from googleapiclient import discovery
 from google.oauth2 import service_account
@@ -9,16 +8,13 @@ from google.oauth2 import service_account
 PROJECT_ID = "info1-284008"
 SERVICE_ACCOUNT_FILE_PATH = "credentials/my_credentials.json"
 
-# client api for communication
-credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE_PATH)
-COMPUTE_CLIENT = discovery.build('compute', 'v1', credentials=credentials)
-
 
 class Checks:
     """
-        this class perform different checks on all gcp compute engines
+        this class perform different checks on all gcp compute engine instances
     """
-    def __init__(self, all_info):
+    def __init__(self, compute_client, all_info):
+        self.compute_client = compute_client
         self.all_info = all_info
 
     # --- check methods ---
@@ -191,16 +187,9 @@ class Checks:
                 reason = "Compute engine instances has external ip address"
             return self.result_template(check_id, result, reason, resource_list, description)
 
-
-
-
-
-
-
-
     # --- supporting methods ---
-    def check_snapshot_schedule(self, zone ,disk):
-        response = COMPUTE_CLIENT.disks().get(project=PROJECT_ID, zone=zone, disk=disk).execute()
+    def check_snapshot_schedule(self, zone, disk):
+        response = self.compute_client.disks().get(project=PROJECT_ID, zone=zone, disk=disk).execute()
         if 'resourcePolicies' in str(response):
             return True
         else:
@@ -229,11 +218,13 @@ class Checks:
 
 class Resource:
     """
-        this class get different resource information to perform checks on all gcp compute engines
+        this class set different resource information to perform checks on all gcp compute engine instances
     """
-    def __init__(self, compute_client, project):
-        self.compute_client = compute_client
-        self.project = project
+    def __init__(self, service_account_file, project_id):
+        credentials = service_account.Credentials.from_service_account_file(service_account_file)
+        # building gcp compute client using gcp compute v1 api
+        self.compute_client = discovery.build('compute', 'v1', credentials=credentials)
+        self.project = project_id
 
     # this method returns list of all zones of gcp
     def get_zones(self):
@@ -262,10 +253,12 @@ class ExecuteCheck:
     # this method execute checks
     def perform_check(self):
         # getting resources for performing check
-        resource_obj = Resource(compute_client=COMPUTE_CLIENT, project=PROJECT_ID)
+        resource_obj = Resource(service_account_file=SERVICE_ACCOUNT_FILE_PATH, project_id=PROJECT_ID)
         all_info = resource_obj.all_instances()
-        #
-        check_obj = Checks(all_info=all_info)
+        compute_client = resource_obj.compute_client
+
+        # initiate Checks class
+        check_obj = Checks(compute_client=compute_client,all_info=all_info)
         all_check_result = [
             check_obj.check_1_1_instances_which_are_not_running(),
             check_obj.check_1_2_deletion_protection(),
