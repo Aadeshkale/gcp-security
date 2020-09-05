@@ -135,7 +135,7 @@ class Checks:
 
     # this method check compute engine does not have automatic restart policy
     def check_1_5_automatic_restart(self):
-        check_id = 1.4
+        check_id = 1.5
         description = "Check for whether compute engine instance does not have automatic restart policy"
         if len(self.all_info) <= 0:
             self.result_template(
@@ -160,6 +160,36 @@ class Checks:
                 reason = "Compute engine instances does have automatic restart policy"
             return self.result_template(check_id, result, reason, resource_list, description)
 
+    # this method check compute engine has external ip address
+    def check_1_6_external_ip_address(self):
+        check_id = 1.6
+        description = "Check for whether compute engine instance has external ip address"
+        if len(self.all_info) <= 0:
+            self.result_template(
+                check_id=check_id,
+                result=False,
+                reason="There is no gcp compute engine instances",
+                resource_list=[],
+                description=description
+            )
+        else:
+            resource_list = []
+            for reg, inst in self.all_info.items():
+                for m in inst:
+                    for netf in m['networkInterfaces']:
+                        if 'natIP' in str(m['networkInterfaces']):
+                            resource_list.append(m['id'])
+
+                    if m['scheduling']['automaticRestart'] == False:
+                       resource_list.append(m['id'])
+
+            if len(resource_list) > 0:
+                result = True
+                reason = "Compute engine instance has external ip address"
+            else:
+                result = False
+                reason = "Compute engine instances has external ip address"
+            return self.result_template(check_id, result, reason, resource_list, description)
 
 
 
@@ -242,6 +272,8 @@ class ExecuteCheck:
             check_obj.check_1_3_all_api_access(),
             check_obj.check_1_4_snapshot_schedule_for_compute_engine_disk(),
             check_obj.check_1_5_automatic_restart(),
+            check_obj.check_1_6_external_ip_address(),
+
         ]
         check_obj.generate_csv(all_check_result)
 
