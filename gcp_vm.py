@@ -187,6 +187,33 @@ class Checks:
                 reason = "Compute engine instances has external ip address"
             return self.result_template(check_id, result, reason, resource_list, description)
 
+    # this method check compute engine instance does not hve any service account associated with it
+    def check_1_7_check_for_service_account(self):
+        check_id = 1.7
+        description = "Check for whether compute engine instances does not have any service account"
+        if len(self.all_info) <= 0:
+            self.result_template(
+                check_id=check_id,
+                result=False,
+                reason="There is no gcp compute engine instances",
+                resource_list=[],
+                description=description
+            )
+        else:
+            resource_list = []
+            for reg, inst in self.all_info.items():
+                for m in inst:
+                    if len(m['serviceAccounts']) <= 0:
+                        resource_list.append(m['id'])
+
+            if len(resource_list) > 0:
+                result = True
+                reason = "Compute engine instances does not have any service account"
+            else:
+                result = False
+                reason = "Compute engine instances has service account"
+            return self.result_template(check_id, result, reason, resource_list, description)
+
     # --- supporting methods ---
     def check_snapshot_schedule(self, zone, disk):
         response = self.compute_client.disks().get(project=PROJECT_ID, zone=zone, disk=disk).execute()
@@ -266,7 +293,7 @@ class ExecuteCheck:
             check_obj.check_1_4_snapshot_schedule_for_compute_engine_disk(),
             check_obj.check_1_5_automatic_restart(),
             check_obj.check_1_6_external_ip_address(),
-
+            check_obj.check_1_7_check_for_service_account(),
         ]
         check_obj.generate_csv(all_check_result)
 
