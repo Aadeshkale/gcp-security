@@ -9,7 +9,7 @@ PROJECT_ID = "info1-284008"
 SERVICE_ACCOUNT_FILE_PATH = "credentials/my_credentials.json"
 
 
-class Checks:
+class VmChecks:
     """
         this class perform different checks on all gcp compute engine instances
     """
@@ -243,7 +243,7 @@ class Checks:
         print("Output write to:gcp_vm.csv")
 
 
-class Resource:
+class VmResource:
     """
         this class set different resource information to perform checks on all gcp compute engine instances
     """
@@ -273,19 +273,23 @@ class Resource:
         return all_info
 
 
-class ExecuteCheck:
+class ExecuteCheckVm:
     """
         This class Execute all check and generates report
     """
+    def __init__(self, servive_account_file_path, project_id):
+        self.servive_account_file_path = servive_account_file_path
+        self.project_id = project_id
+
     # this method execute checks
     def perform_check(self):
         # getting resources for performing check
-        resource_obj = Resource(service_account_file=SERVICE_ACCOUNT_FILE_PATH, project_id=PROJECT_ID)
+        resource_obj = VmResource(service_account_file=self.servive_account_file_path, project_id=self.project_id)
         all_info = resource_obj.all_instances()
         compute_client = resource_obj.compute_client
 
         # initiate Checks class
-        check_obj = Checks(compute_client=compute_client,all_info=all_info)
+        check_obj = VmChecks(compute_client=compute_client,all_info=all_info)
         all_check_result = [
             check_obj.check_1_1_instances_which_are_not_running(),
             check_obj.check_1_2_deletion_protection(),
@@ -298,5 +302,5 @@ class ExecuteCheck:
         check_obj.generate_csv(all_check_result)
 
 
-exp = ExecuteCheck()
+exp = ExecuteCheckVm(servive_account_file_path=SERVICE_ACCOUNT_FILE_PATH,project_id=PROJECT_ID)
 exp.perform_check()

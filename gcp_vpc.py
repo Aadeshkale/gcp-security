@@ -9,7 +9,7 @@ PROJECT_ID = "info1-284008"
 SERVICE_ACCOUNT_FILE_PATH = "credentials/my_credentials.json"
 
 
-class Checks:
+class VpcChecks:
     """
         this class perform different checks on all gcp vpc network
     """
@@ -297,7 +297,7 @@ class Checks:
         print("Output write to:gcp_vpc.csv")
 
 
-class Resource:
+class VpcResource:
     """
         this class set different resource information to perform checks on all gcp vpc networks
     """
@@ -324,20 +324,24 @@ class Resource:
         return firewall_rules
 
 
-class ExecuteCheck:
+class ExecuteCheckVpc:
     """
         This class Execute all check and generates report
     """
+    def __init__(self, servive_account_file_path, project_id):
+        self.servive_account_file_path = servive_account_file_path
+        self.project_id = project_id
+
     # this method execute checks
     def perform_check(self):
         # getting resources for performing check
-        resource_obj = Resource(service_account_file=SERVICE_ACCOUNT_FILE_PATH, project_id=PROJECT_ID)
+        resource_obj = VpcResource(service_account_file=self.servive_account_file_path, project_id=self.project_id)
         vpc_net = resource_obj.all_vpc_networks()
         firewall_rules = resource_obj.all_firewall_rules()
         compute_client = resource_obj.compute_client
 
         # initiate Checks class
-        check_obj = Checks(compute_client=compute_client, vpc_net=vpc_net, firewall_rules=firewall_rules)
+        check_obj = VpcChecks(compute_client=compute_client, vpc_net=vpc_net, firewall_rules=firewall_rules)
         all_check_result = [
             check_obj.check_2_1_vpc_has_global_routing(),
             check_obj.check_2_2_vpc_has_auto_created_subnets(),
@@ -350,5 +354,5 @@ class ExecuteCheck:
         check_obj.generate_csv(all_check_result)
 
 
-exp = ExecuteCheck()
+exp = ExecuteCheckVpc(servive_account_file_path=SERVICE_ACCOUNT_FILE_PATH, project_id=PROJECT_ID)
 exp.perform_check()
