@@ -88,10 +88,12 @@ class Checks:
         else:
             resource_list = []
             for net in self.vpc_net:
-                if len(net['subnetworks']) <= 0:
-                    res = "vpc_id:{}".format(net['id'])
-                    resource_list.append(res)
-
+                try:
+                    if len(net['subnetworks']) <= 0:
+                        res = "vpc_id:{}".format(net['id'])
+                        resource_list.append(res)
+                except:
+                    pass
             if len(resource_list) > 0:
                 result = True
                 reason = "GCP vpc network has network has no subnets created"
@@ -128,9 +130,111 @@ class Checks:
                 result = False
                 reason = "GCP vpc networks have firewall rules"
             return self.result_template(check_id, result, reason, resource_list, description)
+    
+    # this method check gcp vpc subnet allow incoming internet traffic on which port on which
+    def check_2_5_vpc_allow_internet_on_port(self):
+        check_id = 2.5
+        description = "Check for gcp vpc vpc subnet allow incoming internet traffic on which port"
+        if len(self.vpc_net) <= 0:
+            self.result_template(
+                check_id=check_id,
+                result=False,
+                reason="There is no gcp vpc network created",
+                resource_list=[],
+                description=description
+            )
+        else:
+            resource_list = []
+            for net in self.vpc_net:
+                network_name = net['name']
+                res = self.check_incoming_internet_traffic(network_name)
+                if res == False:
+                  pass
+                elif len(res) > 0:
+                    resp = "vpc_id_{}".format(net['id'])
+                    temp_res = dict()
+                    temp_res[resp] = res
+                    resource_list.append(temp_res)
 
+            if len(resource_list) > 0:
+                result = True
+                reason = "GCP vpc subnet network network allow incoming internet traffic on which port"
+            else:
+                result = False
+                reason = "GCP vpc network incoming traffic not allow on any port"
+            return self.result_template(check_id, result, reason, resource_list, description)
 
+    # this method is check flow logs is not enabled on particular custom vpc subnet
+    def check_2_6_vpc_subnet_flow_logs_disabled(self):
+        check_id = 2.6
+        description = "Check for gcp custom vpc subnet flow logs is not enabled"
+        if len(self.vpc_net) <= 0:
+            self.result_template(
+                check_id=check_id,
+                result=False,
+                reason="There is no gcp vpc network created",
+                resource_list=[],
+                description=description
+            )
+        else:
+            resource_list = []
+            for net in self.vpc_net:
+                try:
+                    subnetworks = net['subnetworks']
+                    for subnet in subnetworks:
+                        sub_res = subnet.split('/')
+                        sub_name = sub_res[-1]
+                        sub_region = sub_res[-3]
+                        resp = self.check_subnet_flow_log(sub_name,sub_region)
+                        if resp == False:
+                            res = dict()
+                            vpc = "vpc_id_{})".format(str(net['id']))
+                            res[vpc] = sub_name
+                            resource_list.append(res)
+                except:
+                    pass
 
+            if len(resource_list) > 0:
+                result = True
+                reason = "GCP vpc custom subnet flow logs is not enabled"
+            else:
+                result = False
+                reason = "ALL GCP vpc custom subnets flow logs are enabled"
+            return self.result_template(check_id, result, reason, resource_list, description)
+
+    # this method is check vpc has active peering connection with another vpc
+    def check_2_7_vpc_has_active_peering_with_another_vpc(self):
+        check_id = 2.7
+        description = "Check vpc has active peering connection with another vpc"
+        if len(self.vpc_net) <= 0:
+            self.result_template(
+                check_id=check_id,
+                result=False,
+                reason="There is no gcp vpc network created",
+                resource_list=[],
+                description=description
+            )
+        else:
+            resource_list = []
+            for net in self.vpc_net:
+                try:
+                    if net['peerings']:
+                        for peering in net['peerings']:
+                            if peering['state'] == 'ACTIVE':
+                                name = peering['name']
+                                res = dict()
+                                vpc = "vpc_id_{})".format(str(net['id']))
+                                res[vpc] = name
+                                resource_list.append(res)
+                except:
+                    pass
+            if len(resource_list) > 0:
+                result = True
+                reason = "GCP vpc has active peering connection with another vpc"
+            else:
+                result = False
+                reason = "All GCP vpc does not have any active peering connection"
+            return self.result_template(check_id, result, reason, resource_list, description)
 
     # --- supporting methods ---
     # this method check gcp vpc network has firewall rule
@@ -144,8 +248,33 @@ class Checks:
         else:
             return False
 
+    # this method check gcp vpc network has incoming traffic firewall rule
+    def check_incoming_internet_traffic(self, network_name):
+        net_rule = []
+        for rule in self.firewall_rules:
+            if network_name in str(rule['network']):
+                if '0.0.0.0/0' in str(rule) and rule['direction'] == 'INGRESS':
+                    firewall_id = "firewall_id_{}".format(str(rule['id']))
+                    res = dict()
+                    res[firewall_id] = rule['allowed']
+                    net_rule.append(res)
 
+        if len(net_rule) > 0:
+            return net_rule
+        else:
+            return False
 
+    # this method checks flow logs are enabled on vpc subnet
+    def check_subnet_flow_log(self, subnet_name, region):
+        response = self.compute_client.subnetworks().get(
+            project=PROJECT_ID,
+            region=region,
+            subnetwork=subnet_name
+        ).execute()
+        try:
+            return response['enableFlowLogs']
+        except:
+            return False
 
     # this method generates template for each check
     def result_template(self, check_id, result, reason, resource_list, description):
@@ -194,6 +323,7 @@ class Resource:
             firewall_rules.append(network)
         return firewall_rules
 
+
 class ExecuteCheck:
     """
         This class Execute all check and generates report
@@ -213,10 +343,11 @@ class ExecuteCheck:
             check_obj.check_2_2_vpc_has_auto_created_subnets(),
             check_obj.check_2_3_there_is_no_subnets(),
             check_obj.check_2_4_vpc_does_not_have_any_firewall_rule(),
+            check_obj.check_2_5_vpc_allow_internet_on_port(),
+            check_obj.check_2_6_vpc_subnet_flow_logs_disabled(),
+            check_obj.check_2_7_vpc_has_active_peering_with_another_vpc(),
         ]
         check_obj.generate_csv(all_check_result)
-
-
 
 
 exp = ExecuteCheck()
