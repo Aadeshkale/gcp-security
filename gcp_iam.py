@@ -276,7 +276,7 @@ class IamResource:
         return service_accounts_info
 
     def all_policies(self):
-        policy = self.resource_manager_client.projects().getIamPolicy(resource=PROJECT_ID).execute()
+        policy = self.resource_manager_client.projects().getIamPolicy(resource=self.project).execute()
         return policy['bindings']
 
 
