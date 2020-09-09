@@ -23,13 +23,14 @@ class SqlChecks:
         check_id = 4.1
         description = "Check for gcp cloud sql instance has public internet access"
         if len(self.sql_instances) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp cloud sql instances created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for inst in self.sql_instances:
@@ -52,13 +53,14 @@ class SqlChecks:
         check_id = 4.2
         description = "Check for gcp cloud sql instance does not have auto backup"
         if len(self.sql_instances) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp cloud sql instances created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for inst in self.sql_instances:
@@ -83,13 +85,14 @@ class SqlChecks:
         check_id = 4.3
         description = "Check for gcp cloud sql instance does not have auto scaling enabled"
         if len(self.sql_instances) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp cloud sql instances created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for inst in self.sql_instances:
@@ -114,13 +117,14 @@ class SqlChecks:
         check_id = 4.4
         description = "Check for gcp cloud sql instance does not have high availability in region"
         if len(self.sql_instances) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp cloud sql instances created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for inst in self.sql_instances:
@@ -145,13 +149,14 @@ class SqlChecks:
         check_id = 4.5
         description = "Check for gcp cloud sql instance authorized to GEA Applications"
         if len(self.sql_instances) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp cloud sql instances created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for inst in self.sql_instances:
@@ -181,13 +186,14 @@ class SqlChecks:
         check_id = 4.6
         description = "Check for gcp cloud sql instance does not have fail over replica"
         if len(self.sql_instances) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp cloud sql instances created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for inst in self.sql_instances:
@@ -207,11 +213,7 @@ class SqlChecks:
                 reason = "ALL gcp cloud sql instances have fail over replica"
             return self.result_template(check_id, result, reason, resource_list, description)
 
-
-
-
     # --- supporting methods ---
-
     # this method generates template for each check
     def result_template(self, check_id, result, reason, resource_list, description):
         template = dict()
@@ -247,7 +249,7 @@ class SqlResource:
     def all_project_instances(self):
         sql_instances = []
         resp = self.sql_client.instances().list(project=self.project).execute()
-        if len(resp['items']) > 0:
+        if 'items' in str(resp):
             for inst in resp['items']:
                 sql_instances.append(inst)
         return sql_instances
