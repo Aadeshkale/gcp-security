@@ -23,13 +23,14 @@ class VmChecks:
         check_id = 1.1
         description = "Check for compute engine instances which are not running"
         if len(self.all_info) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp compute engine instances",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for reg, inst in self.all_info.items():
@@ -50,13 +51,14 @@ class VmChecks:
         check_id = 1.2
         description = "Check for compute engine instances which does not have deletion protection"
         if len(self.all_info) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp compute engine instances",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for reg, inst in self.all_info.items():
@@ -77,13 +79,14 @@ class VmChecks:
         check_id = 1.3
         description = "Check for compute engine instances has all api access"
         if len(self.all_info) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp compute engine instances",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for reg, inst in self.all_info.items():
@@ -104,13 +107,14 @@ class VmChecks:
         check_id = 1.4
         description = "Check for whether compute engine instance disk has snapshot schedule"
         if len(self.all_info) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp compute engine instances",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for reg, inst in self.all_info.items():
@@ -134,13 +138,14 @@ class VmChecks:
         check_id = 1.5
         description = "Check for whether compute engine instance does not have automatic restart policy"
         if len(self.all_info) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp compute engine instances",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for reg, inst in self.all_info.items():
@@ -161,13 +166,14 @@ class VmChecks:
         check_id = 1.6
         description = "Check for whether compute engine instance has external ip address"
         if len(self.all_info) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp compute engine instances",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for reg, inst in self.all_info.items():
@@ -192,13 +198,14 @@ class VmChecks:
         check_id = 1.7
         description = "Check for whether compute engine instances does not have any service account"
         if len(self.all_info) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp compute engine instances",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for reg, inst in self.all_info.items():
