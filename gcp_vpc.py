@@ -24,13 +24,14 @@ class VpcChecks:
         check_id = 2.1
         description = "Check for gcp vpc network has global routing"
         if len(self.vpc_net) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp vpc network created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for net in self.vpc_net:
@@ -51,13 +52,14 @@ class VpcChecks:
         check_id = 2.2
         description = "Check for gcp vpc network has auto created subnets"
         if len(self.vpc_net) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp vpc network created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for net in self.vpc_net:
@@ -78,13 +80,14 @@ class VpcChecks:
         check_id = 2.3
         description = "Check for gcp vpc network has network has no subnets created"
         if len(self.vpc_net) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp vpc network created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for net in self.vpc_net:
@@ -107,13 +110,14 @@ class VpcChecks:
         check_id = 2.4
         description = "Check for gcp vpc network does not have any firewall rule"
         if len(self.vpc_net) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp vpc network created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for net in self.vpc_net:
@@ -136,13 +140,14 @@ class VpcChecks:
         check_id = 2.5
         description = "Check for gcp vpc vpc subnet allow incoming internet traffic on which port"
         if len(self.vpc_net) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp vpc network created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for net in self.vpc_net:
@@ -169,13 +174,14 @@ class VpcChecks:
         check_id = 2.6
         description = "Check for gcp custom vpc subnet flow logs is not enabled"
         if len(self.vpc_net) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp vpc network created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for net in self.vpc_net:
@@ -207,13 +213,14 @@ class VpcChecks:
         check_id = 2.7
         description = "Check vpc has active peering connection with another vpc"
         if len(self.vpc_net) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp vpc network created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for net in self.vpc_net:
