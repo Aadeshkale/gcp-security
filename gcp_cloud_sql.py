@@ -17,12 +17,11 @@ class SqlChecks:
         self.sql_client = sql_client
         self.sql_instances = sql_instances
 
-
     # --- check methods ---
-    # this method check gcp cloud sql has public internet access
+    # this method check gcp cloud sql instance has public internet access
     def check_4_1_cloud_sql_public_access(self):
         check_id = 4.1
-        description = "Check for gcp cloud sql has public internet access"
+        description = "Check for gcp cloud sql instance has public internet access"
         if len(self.sql_instances) <= 0:
             self.result_template(
                 check_id=check_id,
@@ -34,16 +33,181 @@ class SqlChecks:
         else:
             resource_list = []
             for inst in self.sql_instances:
-                if inst['settings']['ipConfiguration']['ipv4Enabled'] == True:
+                try:
+                    if inst['settings']['ipConfiguration']['ipv4Enabled'] == True:
+                        resource_list.append(inst['connectionName'])
+                except:
+                    pass
+
+            if len(resource_list) > 0:
+                result = True
+                reason = "Gcp cloud sql instance has public internet access"
+            else:
+                result = False
+                reason = "ALL Gcp cloud sql instances does not have public internet access"
+            return self.result_template(check_id, result, reason, resource_list, description)
+
+    # this method check gcp cloud sql does not have auto backup
+    def check_4_2_cloud_sql_backup_config(self):
+        check_id = 4.2
+        description = "Check for gcp cloud sql instance does not have auto backup"
+        if len(self.sql_instances) <= 0:
+            self.result_template(
+                check_id=check_id,
+                result=False,
+                reason="There is no gcp cloud sql instances created",
+                resource_list=[],
+                description=description
+            )
+        else:
+            resource_list = []
+            for inst in self.sql_instances:
+                try:
+                    if inst['settings']['backupConfiguration']['enabled']:
+                        pass
+                    else:
+                        resource_list.append(inst['connectionName'])
+                except:
                     resource_list.append(inst['connectionName'])
 
             if len(resource_list) > 0:
                 result = True
-                reason = "Gcp cloud sql has public internet access"
+                reason = "Gcp cloud sql instance does not have auto backup"
             else:
                 result = False
-                reason = "ALL Gcp cloud sql does not have public internet access"
+                reason = "ALL gcp cloud sql instances  have auto backup"
             return self.result_template(check_id, result, reason, resource_list, description)
+
+    # this method check gcp cloud sql instance does not have auto scaling enabled
+    def check_4_3_cloud_sql_auto_scaling(self):
+        check_id = 4.3
+        description = "Check for gcp cloud sql instance does not have auto scaling enabled"
+        if len(self.sql_instances) <= 0:
+            self.result_template(
+                check_id=check_id,
+                result=False,
+                reason="There is no gcp cloud sql instances created",
+                resource_list=[],
+                description=description
+            )
+        else:
+            resource_list = []
+            for inst in self.sql_instances:
+                try:
+                    if inst['settings']['storageAutoResize']:
+                        pass
+                    else:
+                        resource_list.append(inst['connectionName'])
+                except:
+                    resource_list.append(inst['connectionName'])
+
+            if len(resource_list) > 0:
+                result = True
+                reason = "gcp cloud sql instance does not have auto scaling enabled"
+            else:
+                result = False
+                reason = "ALL gcp cloud sql instances have auto scaling enabled"
+            return self.result_template(check_id, result, reason, resource_list, description)
+
+    # this method check gcp cloud sql instance does not have high availability in region
+    def check_4_4_cloud_sql_high_availability(self):
+        check_id = 4.4
+        description = "Check for gcp cloud sql instance does not have high availability in region"
+        if len(self.sql_instances) <= 0:
+            self.result_template(
+                check_id=check_id,
+                result=False,
+                reason="There is no gcp cloud sql instances created",
+                resource_list=[],
+                description=description
+            )
+        else:
+            resource_list = []
+            for inst in self.sql_instances:
+                try:
+                    if inst['settings']['availabilityType'] == 'REGIONAL':
+                        pass
+                    else:
+                        resource_list.append(inst['connectionName'])
+                except:
+                    resource_list.append(inst['connectionName'])
+
+            if len(resource_list) > 0:
+                result = True
+                reason = "gcp cloud sql instance does not have high availability in region"
+            else:
+                result = False
+                reason = "ALL gcp cloud sql instances have high availability in region"
+            return self.result_template(check_id, result, reason, resource_list, description)
+
+    # this method check gcp cloud sql instance authorized to GEA Applications
+    def check_4_5_cloud_sql_gae_application(self):
+        check_id = 4.5
+        description = "Check for gcp cloud sql instance authorized to GEA Applications"
+        if len(self.sql_instances) <= 0:
+            self.result_template(
+                check_id=check_id,
+                result=False,
+                reason="There is no gcp cloud sql instances created",
+                resource_list=[],
+                description=description
+            )
+        else:
+            resource_list = []
+            for inst in self.sql_instances:
+                try:
+                    if len(inst['settings']['authorizedGaeApplications']) > 0:
+                        res = dict()
+                        gae_list = []
+                        for gae in inst['settings']['authorizedGaeApplications']:
+                            gae_list.append(gae)
+                        res[inst['name']] = gae_list
+                        resource_list.append(res)
+                    else:
+                        pass
+                except:
+                    pass
+
+            if len(resource_list) > 0:
+                result = True
+                reason = "gcp cloud sql instance authorized to GEA Applications"
+            else:
+                result = False
+                reason = "ALL gcp cloud sql instances not authorized to GEA Applications"
+            return self.result_template(check_id, result, reason, resource_list, description)
+
+    # this method check gcp cloud sql instance does not have fail over replica
+    def check_4_6_cloud_sql_fail_over_replica(self):
+        check_id = 4.6
+        description = "Check for gcp cloud sql instance does not have fail over replica"
+        if len(self.sql_instances) <= 0:
+            self.result_template(
+                check_id=check_id,
+                result=False,
+                reason="There is no gcp cloud sql instances created",
+                resource_list=[],
+                description=description
+            )
+        else:
+            resource_list = []
+            for inst in self.sql_instances:
+                try:
+                    if len(inst['failoverReplica']['available']) == False:
+                        resource_list.append(inst['connectionName'])
+                    else:
+                        pass
+                except:
+                    resource_list.append(inst['connectionName'])
+
+            if len(resource_list) > 0:
+                result = True
+                reason = "gcp cloud sql instance does not have fail over replica"
+            else:
+                result = False
+                reason = "ALL gcp cloud sql instances have fail over replica"
+            return self.result_template(check_id, result, reason, resource_list, description)
+
+
 
 
     # --- supporting methods ---
@@ -107,6 +271,11 @@ class ExecuteCheckSql:
         check_obj = SqlChecks(sql_client=sql_client, sql_instances=sql_instances)
         all_check_result = [
             check_obj.check_4_1_cloud_sql_public_access(),
+            check_obj.check_4_2_cloud_sql_backup_config(),
+            check_obj.check_4_3_cloud_sql_auto_scaling(),
+            check_obj.check_4_4_cloud_sql_high_availability(),
+            check_obj.check_4_5_cloud_sql_gae_application(),
+            check_obj.check_4_6_cloud_sql_fail_over_replica(),
         ]
         check_obj.generate_csv(all_check_result)
 
