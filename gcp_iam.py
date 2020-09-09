@@ -24,13 +24,14 @@ class IamChecks:
         check_id = 3.1
         description = "Check for gcp service account does have user managed key"
         if len(self.all_service_accounts) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp iam service account created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for sacc in self.all_service_accounts:
@@ -51,13 +52,14 @@ class IamChecks:
         check_id = 3.2
         description = "Check for gcp service account is disabled"
         if len(self.all_service_accounts) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp iam service account created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for sacc in self.all_service_accounts:
@@ -79,13 +81,14 @@ class IamChecks:
         check_id = 3.3
         description = "Check for gcp service account has project owner policy role"
         if len(self.all_service_accounts) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp iam service account created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for sacc in self.all_service_accounts:
@@ -107,13 +110,14 @@ class IamChecks:
         check_id = 3.4
         description = "Check for gcp project has more than one owner user"
         if len(self.all_service_accounts) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp iam service account created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             owner_list = []
@@ -140,13 +144,14 @@ class IamChecks:
         check_id = 3.5
         description = "Check for gcp service account has project editor policy role"
         if len(self.all_service_accounts) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp iam service account created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             for sacc in self.all_service_accounts:
@@ -168,13 +173,14 @@ class IamChecks:
         check_id = 3.6
         description = "Check for gcp project has more than one editor user"
         if len(self.all_service_accounts) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp iam service account created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             owner_list = []
@@ -201,13 +207,14 @@ class IamChecks:
         check_id = 3.7
         description = "Check for gcp project has viewer user"
         if len(self.all_service_accounts) <= 0:
-            self.result_template(
+            res = self.result_template(
                 check_id=check_id,
                 result=False,
                 reason="There is no gcp iam service account created",
                 resource_list=[],
                 description=description
             )
+            return res
         else:
             resource_list = []
             if len(self.policies) > 0:
@@ -276,10 +283,12 @@ class IamResource:
         return service_accounts_info
 
     def all_policies(self):
-        policy = self.resource_manager_client.projects().getIamPolicy(resource=self.project).execute()
-        return policy['bindings']
-
-
+        try:
+            policy = self.resource_manager_client.projects().getIamPolicy(resource=self.project).execute()
+            res = policy['bindings']
+        except:
+            return list()
+        return res
 
 class ExecuteCheckIam:
     """
