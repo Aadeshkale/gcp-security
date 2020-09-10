@@ -290,6 +290,7 @@ class IamResource:
             return list()
         return res
 
+
 class ExecuteCheckIam:
     """
         This class Execute all check and generates report
