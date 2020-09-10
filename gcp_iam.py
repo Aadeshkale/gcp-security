@@ -268,7 +268,7 @@ class IamResource:
     """
     def __init__(self, service_account_file, project_id):
         credentials = service_account.Credentials.from_service_account_file(service_account_file)
-        # building gcp compute client using gcp compute v1 api
+        # building gcp iam client using gcp compute v1 api
         self.iam_client = discovery.build('iam', 'v1', credentials=credentials)
         self.resource_manager_client = discovery.build("cloudresourcemanager", "v1", credentials=credentials)
         self.project = project_id
