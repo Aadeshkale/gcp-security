@@ -1,14 +1,14 @@
 """
     This is main file file for handling all checking operations which improves,
-    your GCP security this script is working on project level.
+    your GCP gcpsecurity this script is working on project level.
     This script might take time to execute because of hugh API calls.
 """
 import csv
-from security.gcp_vm import ExecuteCheckVm
-from security.gcp_iam import ExecuteCheckIam
-from security.gcp_vpc import ExecuteCheckVpc
-from security.gcp_gcs import ExecuteCheckGcs
-from security.gcp_cloud_sql import ExecuteCheckSql
+from gcpsecurity.gcp_vm import ExecuteCheckVm
+from gcpsecurity.gcp_iam import ExecuteCheckIam
+from gcpsecurity.gcp_vpc import ExecuteCheckVpc
+from gcpsecurity.gcp_gcs import ExecuteCheckGcs
+from gcpsecurity.gcp_cloud_sql import ExecuteCheckSql
 
 # Credentials path
 SERVICE_ACCOUNT_FILE_PATH = 'credentials/my_credentials.json'
