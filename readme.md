@@ -1,4 +1,4 @@
-# This is the set of python3 scripts used to perform some checks GCP Project Resources to improve security
+# This is the set of python3 scripts used to perform some checks on GCP Project Resources to improve security
 -------------
 
 This script is worked for individual GCP project not on organization or folder level
@@ -45,7 +45,10 @@ How to use ??
               
     
  
-**note:- service account file should have appropriate permissions to perform checks 
+** Note:- service account file should have appropriate permissions to perform checks 
 That is Project Viewer (You can set permissions as per service also)
+
+** Note :-Script might take time to execute because it is make googleapis calls
+
 
     
