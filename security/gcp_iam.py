@@ -5,9 +5,6 @@ import csv
 from googleapiclient import discovery
 from google.oauth2 import service_account
 
-PROJECT_ID = "info1-284008"
-SERVICE_ACCOUNT_FILE_PATH = "credentials/my_credentials.json"
-
 
 class IamChecks:
     """
@@ -318,8 +315,5 @@ class ExecuteCheckIam:
             check_obj.check_3_6_more_than_one_editor(),
             check_obj.check_3_7_there_is_project_viewer(),
         ]
-        check_obj.generate_csv(all_check_result)
+        return all_check_result
 
-
-exp = ExecuteCheckIam(servive_account_file_path=SERVICE_ACCOUNT_FILE_PATH, project_id=PROJECT_ID)
-exp.perform_check()

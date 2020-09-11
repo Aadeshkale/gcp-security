@@ -5,9 +5,6 @@ import csv
 from googleapiclient import discovery
 from google.oauth2 import service_account
 
-PROJECT_ID = "info1-284008"
-SERVICE_ACCOUNT_FILE_PATH = "credentials/my_credentials.json"
-
 
 class GcsChecks:
     """
@@ -253,13 +250,12 @@ class GcsResource:
     # this method returns information of all gcp storage bucket information
     def all_buckets_info(self):
         buckets_info = []
-        req = self.storage_client.buckets().list(project=PROJECT_ID)
+        req = self.storage_client.buckets().list(project=self.project)
         resp = req.execute()
         if 'items' in str(resp):
             for buk in resp['items']:
                 buckets_info.append(buk)
         return buckets_info
-
 
 
 class ExecuteCheckGcs:
@@ -287,8 +283,6 @@ class ExecuteCheckGcs:
             check_obj.check_5_5_bucket_bucket_is_empty(),
             check_obj.check_5_6_bucket_has_lifecycle(),
         ]
-        check_obj.generate_csv(all_check_result)
+        return all_check_result
 
 
-exp = ExecuteCheckGcs(servive_account_file_path=SERVICE_ACCOUNT_FILE_PATH, project_id=PROJECT_ID)
-exp.perform_check()

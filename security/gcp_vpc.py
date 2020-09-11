@@ -5,19 +5,16 @@ import csv
 from googleapiclient import discovery
 from google.oauth2 import service_account
 
-PROJECT_ID = "info1-284008"
-SERVICE_ACCOUNT_FILE_PATH = "credentials/my_credentials.json"
-
 
 class VpcChecks:
     """
         this class perform different checks on all gcp vpc network
     """
-    def __init__(self, compute_client, vpc_net, firewall_rules):
+    def __init__(self, compute_client, vpc_net, firewall_rules, project):
         self.compute_client = compute_client
         self.vpc_net = vpc_net
         self.firewall_rules = firewall_rules
-
+        self.project = project
     # --- check methods ---
     # this method check gcp vpc network has global routing
     def check_2_1_vpc_has_global_routing(self):
@@ -274,7 +271,7 @@ class VpcChecks:
     # this method checks flow logs are enabled on vpc subnet
     def check_subnet_flow_log(self, subnet_name, region):
         response = self.compute_client.subnetworks().get(
-            project=PROJECT_ID,
+            project=self.project,
             region=region,
             subnetwork=subnet_name
         ).execute()
@@ -317,7 +314,7 @@ class VpcResource:
     # this method returns information of all vpc networks available in particular project
     def all_vpc_networks(self):
         vpc_net = []
-        response = self.compute_client.networks().list(project=PROJECT_ID).execute()
+        response = self.compute_client.networks().list(project=self.project).execute()
         for network in response['items']:
             vpc_net.append(network)
         return vpc_net
@@ -325,7 +322,7 @@ class VpcResource:
     # this method returns information of all firewall rules available in particular project
     def all_firewall_rules(self):
         firewall_rules = []
-        response = self.compute_client.firewalls().list(project=PROJECT_ID).execute()
+        response = self.compute_client.firewalls().list(project=self.project).execute()
         for network in response['items']:
             firewall_rules.append(network)
         return firewall_rules
@@ -346,9 +343,9 @@ class ExecuteCheckVpc:
         vpc_net = resource_obj.all_vpc_networks()
         firewall_rules = resource_obj.all_firewall_rules()
         compute_client = resource_obj.compute_client
-
+        project_id = resource_obj.project
         # initiate Checks class
-        check_obj = VpcChecks(compute_client=compute_client, vpc_net=vpc_net, firewall_rules=firewall_rules)
+        check_obj = VpcChecks(compute_client=compute_client, vpc_net=vpc_net, firewall_rules=firewall_rules, project=project_id)
         all_check_result = [
             check_obj.check_2_1_vpc_has_global_routing(),
             check_obj.check_2_2_vpc_has_auto_created_subnets(),
@@ -358,8 +355,5 @@ class ExecuteCheckVpc:
             check_obj.check_2_6_vpc_subnet_flow_logs_disabled(),
             check_obj.check_2_7_vpc_has_active_peering_with_another_vpc(),
         ]
-        check_obj.generate_csv(all_check_result)
+        return all_check_result
 
-
-exp = ExecuteCheckVpc(servive_account_file_path=SERVICE_ACCOUNT_FILE_PATH, project_id=PROJECT_ID)
-exp.perform_check()

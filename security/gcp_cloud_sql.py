@@ -5,9 +5,6 @@ import csv
 from googleapiclient import discovery
 from google.oauth2 import service_account
 
-PROJECT_ID = "info1-284008"
-SERVICE_ACCOUNT_FILE_PATH = "credentials/my_credentials.json"
-
 
 class SqlChecks:
     """
@@ -279,8 +276,5 @@ class ExecuteCheckSql:
             check_obj.check_4_5_cloud_sql_gae_application(),
             check_obj.check_4_6_cloud_sql_fail_over_replica(),
         ]
-        check_obj.generate_csv(all_check_result)
+        return all_check_result
 
-
-exp = ExecuteCheckSql(servive_account_file_path=SERVICE_ACCOUNT_FILE_PATH, project_id=PROJECT_ID)
-exp.perform_check()

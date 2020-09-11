@@ -5,18 +5,16 @@ import csv
 from googleapiclient import discovery
 from google.oauth2 import service_account
 
-PROJECT_ID = "info1-284008"
-SERVICE_ACCOUNT_FILE_PATH = "credentials/my_credentials.json"
 
 
 class VmChecks:
     """
         this class perform different checks on all gcp compute engine instances
     """
-    def __init__(self, compute_client, all_info):
+    def __init__(self, compute_client, all_info, project):
         self.compute_client = compute_client
         self.all_info = all_info
-
+        self.project = project
     # --- check methods ---
     # this method check compute engine instances which are not running
     def check_1_1_instances_which_are_not_running(self):
@@ -223,7 +221,7 @@ class VmChecks:
 
     # --- supporting methods ---
     def check_snapshot_schedule(self, zone, disk):
-        response = self.compute_client.disks().get(project=PROJECT_ID, zone=zone, disk=disk).execute()
+        response = self.compute_client.disks().get(project=self, zone=zone, disk=disk).execute()
         if 'resourcePolicies' in str(response):
             return True
         else:
@@ -294,9 +292,9 @@ class ExecuteCheckVm:
         resource_obj = VmResource(service_account_file=self.servive_account_file_path, project_id=self.project_id)
         all_info = resource_obj.all_instances()
         compute_client = resource_obj.compute_client
-
+        project = resource_obj.project
         # initiate Checks class
-        check_obj = VmChecks(compute_client=compute_client,all_info=all_info)
+        check_obj = VmChecks(compute_client=compute_client, all_info=all_info, project=project)
         all_check_result = [
             check_obj.check_1_1_instances_which_are_not_running(),
             check_obj.check_1_2_deletion_protection(),
@@ -306,8 +304,4 @@ class ExecuteCheckVm:
             check_obj.check_1_6_external_ip_address(),
             check_obj.check_1_7_check_for_service_account(),
         ]
-        check_obj.generate_csv(all_check_result)
-
-
-exp = ExecuteCheckVm(servive_account_file_path=SERVICE_ACCOUNT_FILE_PATH,project_id=PROJECT_ID)
-exp.perform_check()
+        return all_check_result
