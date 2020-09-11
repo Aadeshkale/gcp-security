@@ -2,6 +2,7 @@
 *.csv
 .gitignore
 test.py
+setup.py
 credentials/*
 build/*
 dist/*
