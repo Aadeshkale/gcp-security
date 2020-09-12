@@ -204,5 +204,4 @@ class ExecuteCheckGae:
             check_obj.check_6_2_app_engine_service_has_more_than_one_versions(),
             check_obj.check_6_3_app_engine_service_is_not_serving(),
         ]
-        check_obj.generate_csv(all_check_result)
         return all_check_result
