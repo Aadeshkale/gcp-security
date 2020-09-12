@@ -9,7 +9,7 @@ from gcpsecurity.gcp_iam import ExecuteCheckIam
 from gcpsecurity.gcp_vpc import ExecuteCheckVpc
 from gcpsecurity.gcp_gcs import ExecuteCheckGcs
 from gcpsecurity.gcp_cloud_sql import ExecuteCheckSql
-
+from gcpsecurity.gcp_app_engine import ExecuteCheckGae
 # Credentials path
 SERVICE_ACCOUNT_FILE_PATH = 'credentials/my_credentials.json'
 PROJECT_ID = "info1-284008"
@@ -26,10 +26,11 @@ gcs = ExecuteCheckGcs(servive_account_file_path=SERVICE_ACCOUNT_FILE_PATH, proje
 gcs_result = gcs.perform_check()
 sql = ExecuteCheckSql(servive_account_file_path=SERVICE_ACCOUNT_FILE_PATH, project_id=PROJECT_ID)
 sql_result = sql.perform_check()
-
+gae = ExecuteCheckGae(servive_account_file_path=SERVICE_ACCOUNT_FILE_PATH, project_id=PROJECT_ID)
+gae_result = gae.perform_check()
 
 # combine all results of each service
-result = vm_result + vpc_result + iam_result + sql_result + gcs_result
+result = vm_result + vpc_result + iam_result + sql_result + gcs_result + gae_result
 
 
 # generating csv file from result
