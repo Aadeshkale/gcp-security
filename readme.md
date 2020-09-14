@@ -6,7 +6,6 @@ __________
 
 package installation
     
-    install package using 
     pip3 install gcpsecurity
 
 Ensure google cloud platform API is enable for particular service on which you want to perform check
