@@ -5,7 +5,7 @@ with open("readme.md", "r") as fh:
 
 setuptools.setup(
     name="gcpsecurity",
-    version="0.0.3",
+    version="0.0.4",
     author="Aadesh Kale",
     author_email="aadeshkale619@gmail.com",
     description="Small package used to analyze or improve gcp security of GCP cloud resources",
